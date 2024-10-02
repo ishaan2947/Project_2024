@@ -7,7 +7,8 @@
 2. Ishaan Nigam
 3. Yusa Sagli
 4. Mustafa Tekin
-
+   
+Note: We will communicate through our phone messaging apps  
 ## 2. Project topic (e.g., parallel sorting algorithms)
 
 ### 2a. Brief project description (what algorithms will you be comparing and on what architectures)
