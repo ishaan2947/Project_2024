@@ -8,20 +8,78 @@
 3. Yusa Sagli
 4. Mustafa Tekin
    
-Note: We will communicate through our phone messaging apps  
+Note: We will communicate through imessage on our phones  
 ## 2. Project topic (e.g., parallel sorting algorithms)
 
 ### 2a. Brief project description (what algorithms will you be comparing and on what architectures)
 
-- Bitonic Sort:
-- Sample Sort:
-- Merge Sort:
-- Radix Sort:
+Bitonic Sort(Ishaan):This is a comparison-based sorting algorithm that is well-suited for parallel computing. It works by recursively sorting a sequence into a
+bitonic sequence and then merging it.This algorithm is ment to be highly efficient on parallel architectures due to its regular structure.
+    
+Sample Sort:
+  
+Merge Sort:
+  
+Radix Sort:
+
+Architectures and Tools:
+   Architecture: Distributed-memory systems using MPI on Grace.
+   Parallelization Strategies: Implementing both master/worker and SPMD models.
+   Performance Measurement: Using Caliper for performance instrumentation and Thicket for analysis.
+  
 
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
+
+Bitonic Sort(Ishaan):
+Initialize MPI environment
+Determine rank and size
+Generate local portion of data
+
+for stage = 1 to log2(size) do
+    for step = stage down to 1 do
+        partner = rank XOR 2^(step - 1)
+        if rank < partner then
+            Send data to partner using MPI_Send
+            Receive data from partner using MPI_Recv
+            Merge received data with local data in ascending order
+        else
+            Receive data from partner using MPI_Recv
+            Send data to partner using MPI_Send
+            Merge received data with local data in descending order
+        end if
+    end for
+end for
+
+Finalize MPI environment
+
 
 ### 2c. Evaluation plan - what and how will you measure and compare
 - Input sizes, Input types
 - Strong scaling (same problem size, increase number of processors/nodes)
 - Weak scaling (increase problem size, increase number of processors)
+
+Metrics to Measure:
+- Execution Time: Total time taken by each algorithm to sort the data.
+- Speedup: How much faster the parallel algorithm is compared to the sequential version.
+- Efficiency: Ratio of speedup to the number of processors.
+- Scalability: How performance changes with varying numbers of processors (strong and weak scaling).
+- Communication Overhead: Time spent in communication between processors.
+  
+Input Sizes:
+- ...
+  
+Input Types:
+- Sorted: Data already in order.
+- Sorted with 1% Perturbed: Nearly sorted data with minor perturbations.
+- Random: Data in random order.
+- Reverse Sorted: Data sorted in reverse order.
+
+Scaling Experiments:
+
+   1.) Strong Scaling: 
+      Keeping the problem size constant while increasing the number of processors.By doing this we can observe how the execution time decreases as more processors        are added.
+      Plan:Choose a fixed large dataset.Run each algorithm on varying numbers of processors (e.g., 2, 4, 8, 16, 32).Record execution times and calculate speedup          and efficiency.
+   
+2.) Weak Scaling:
+...
