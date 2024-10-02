@@ -33,25 +33,28 @@ Architectures and Tools:
 
 Bitonic Sort(Ishaan):
 Initialize MPI environment
-Determine rank and size
+Determine rank (process ID) and size (number of processes)
 Generate local portion of data
 
-for stage = 1 to log2(size) do
-    for step = stage down to 1 do
-        partner = rank XOR 2^(step - 1)
+Perform local sort on the data
+
+for k = 2 to number of processes step *2* do
+    for j = k / 2 down to 1 step /2/ do
+        partner = rank XOR j
         if rank < partner then
-            Send data to partner using MPI_Send
-            Receive data from partner using MPI_Recv
-            Merge received data with local data in ascending order
+            send data to partner using MPI_Send
+            receive data from partner using MPI_Recv
+            merge data in ascending order
         else
-            Receive data from partner using MPI_Recv
-            Send data to partner using MPI_Send
-            Merge received data with local data in descending order
+            receive data from partner using MPI_Recv
+            send data to partner using MPI_Send
+            merge data in descending order
         end if
     end for
 end for
 
 Finalize MPI environment
+
 
 
 ### 2c. Evaluation plan - what and how will you measure and compare
