@@ -87,8 +87,9 @@ Input Types:
 Scaling Experiments:
 
    1.) Strong Scaling: 
-      Keeping the problem size constant while increasing the number of processors.By doing this we can observe how the execution time decreases as more processors        are added.
-      Plan:Choose a fixed large dataset.Run each algorithm on varying numbers of processors (e.g., 2, 4, 8, 16, 32).Record execution times and calculate speedup          and efficiency.
+      - Keeping the problem size constant while increasing the number of processors.By doing this we can observe how the execution time decreases as more      
+        processors are added.
+      - Plan:Choose a fixed large dataset.Run each algorithm on varying numbers of processors (e.g., 2, 4, 8, 16, 32).Record execution times and calculate speedup          and efficiency.
    
 2.) Weak Scaling:
 ...
