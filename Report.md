@@ -1,12 +1,12 @@
 # CSCE 435 Group project
 
-## 0. Group number: 
+## 0. Group number: 21
 
 ## 1. Group members:
-1. First
-2. Second
-3. Third
-4. Fourth
+1. Sathvik Yeruva
+2. Ishaan Nigam
+3. Yusa Sagli
+4. Mustafa Tekin
 
 ## 2. Project topic (e.g., parallel sorting algorithms)
 
