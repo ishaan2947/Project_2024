@@ -23,23 +23,23 @@ Merge Sort:
 Radix Sort:
 
 Architectures and Tools:
-   Architecture: Distributed-memory systems using MPI on Grace.
-   Parallelization Strategies: Implementing both master/worker and SPMD models.
-   Performance Measurement: Using Caliper for performance instrumentation and Thicket for analysis.
+Architecture: Distributed-memory systems using MPI on the Grace supercomputing platform.
+Parallelization Strategies: Implementing both master/worker and SPMD models.
+Performance Measurement: Using Caliper for performance instrumentation and Thicket for analysis.
   
 
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
 
 Bitonic Sort(Ishaan):
-Initialize MPI environment
-Determine rank (process ID) and size (number of processes)
-Generate local portion of data
+- Initialize MPI environment
+- Determine rank (process ID) and size (number of processes)
+- Generate local portion of data
 
 Perform local sort on the data
 
-for k = 2 to number of processes step *2* do
-    for j = k / 2 down to 1 step /2/ do
+for k = 2 to number of processes step 2 do
+    for j = k / 2 down to 1 step 2 do
         partner = rank XOR j
         if rank < partner then
             send data to partner using MPI_Send
@@ -54,6 +54,7 @@ for k = 2 to number of processes step *2* do
 end for
 
 Finalize MPI environment
+
 
 
 
