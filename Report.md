@@ -33,7 +33,7 @@ Architectures and Tools:
 
 Bitonic Sort (Ishaan):
 
-```markdown
+```text
 #### Bitonic Sort (Ishaan):
 
     Initialize MPI environment
@@ -58,6 +58,7 @@ Bitonic Sort (Ishaan):
     end for
 
     Finalize MPI environment
+```
 
 
 
