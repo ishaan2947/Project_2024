@@ -55,7 +55,7 @@ for k = 2 to number of processes step 2 do
 end for
 
 Finalize MPI environment
-
+```plaintext
 
 
 
