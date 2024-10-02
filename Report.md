@@ -31,31 +31,34 @@ Architectures and Tools:
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
 
-Bitonic Sort(Ishaan):
-```plaintext
-Initialize MPI environment
-Determine rank (process ID) and size (number of processes)
-Generate local portion of data
+Bitonic Sort (Ishaan):
 
-Perform local sort on the data
+```markdown
+#### Bitonic Sort (Ishaan):
 
-for k = 2 to number of processes step 2 do
-    for j = k / 2 down to 1 step 2 do
-        partner = rank XOR j
-        if rank < partner then
-            send data to partner using MPI_Send
-            receive data from partner using MPI_Recv
-            merge data in ascending order
-        else
-            receive data from partner using MPI_Recv
-            send data to partner using MPI_Send
-            merge data in descending order
-        end if
+    Initialize MPI environment
+    Determine rank (process ID) and size (number of processes)
+    Generate local portion of data
+
+    Perform local sort on the data
+
+    for k = 2 to number of processes step 2 do
+        for j = k / 2 down to 1 step 2 do
+            partner = rank XOR j
+            if rank < partner then
+                send data to partner using MPI_Send
+                receive data from partner using MPI_Recv
+                merge data in ascending order
+            else
+                receive data from partner using MPI_Recv
+                send data to partner using MPI_Send
+                merge data in descending order
+            end if
+        end for
     end for
-end for
 
-Finalize MPI environment
-```plaintext
+    Finalize MPI environment
+
 
 
 
