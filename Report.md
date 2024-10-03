@@ -16,7 +16,7 @@ Note: We will communicate through imessage on our phones
 Bitonic Sort(Ishaan):This is a comparison-based sorting algorithm that is well-suited for parallel computing. It works by recursively sorting a sequence into a
 bitonic sequence and then merging it.This algorithm is ment to be highly efficient on parallel architectures due to its regular structure.
     
-Sample Sort:
+Sample Sort(Mustafa):
   
 Merge Sort:
   
@@ -59,7 +59,19 @@ Bitonic Sort (Ishaan):
 
     Finalize MPI environment
 ```
+Sample Sort (Mustafa):
 
+```text
+#### Sample Sort (Mustafa):
+
+    Initialize MPI environment
+    Determine rank (process ID) and size (number of processes)
+    Generate local portion of data
+
+    ADD Psuedo Algorithm
+
+    Finalize MPI environment
+```
 
 
 
