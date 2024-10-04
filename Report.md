@@ -130,7 +130,7 @@ Metrics to Measure:
 - Communication Overhead: Time spent in communication between processors.
   
 Input Sizes:
-- 1000, 3000, 7000, 15000, 31000
+- 2000, 4000, 8000, 16000, 32000
   
 Input Types:
 - Sorted: Data already in order.
@@ -148,5 +148,5 @@ Scaling Experiments:
    2.) Weak Scaling:
       - Increasing problem size while also increasing the number of processors. The problem size proportion should remain constant with for the number of
       processors (proportional).
-      - Plan: Each worker processor should have 1000 values to sort through, so 2 processors (1 master + 1 worker) would have 1000 values while 32 processors
-      (1 master + 31 worker) would have 31000 values to sort. Keeping the problem size proportially constant to the number of worker processes.
+      - Plan: Each processor should have 1000 values to sort through, so 2 processors would have 2000 values while 32 processors
+      would have 32000 values to sort. Keeping the problem size proportially constant to the number of processes.
