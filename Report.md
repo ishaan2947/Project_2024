@@ -18,7 +18,7 @@ bitonic sequence and then merging it.This algorithm is ment to be highly efficie
     
 Sample Sort(Mustafa):This is a divide-and-conquer sorting algorithm that is well-suited for parallel computation. This algorithm wokrs by picking a set of sample from the input using it to partition the data into smaller buckets and sorting each bucket individually. Sample sort is designed in such a way to minimize inter-process communication, making it highly scalable.
   
-Merge Sort:
+Merge Sort(Sathvik): Merge Sort is a divide-and-conquer sorting algorithm that functions by recursively splitting the data set into smaller sublists, sorts them and then merges them together to create a fully sorted list. Merge Sort can use parallel architectures highly efficiently as the portions of data that the original data set is broken can be distributed across several processors which would allow for simultaneous sorting and merging of the sublists.
   
 Radix Sort:
 
@@ -115,7 +115,41 @@ Finalize MPI environment
 
 ```
 
+Merge Sort(Sathvik):
+```text
+#### Merge Sort(Sathvik):
 
+    Initialize MPI environment
+    Determine rank (process ID) and size (number of processes)
+
+    If rank == 0:
+        Generate/Read Full Data Set
+        Divide the data set into equal chunks
+        Distribute chunks to all processors including itself with MPI_Send
+    Else:
+        Receive chunk of data using MPI_Recv
+
+    Perform local sort on recieved data (Ex. Quicksort)
+
+    active = True
+    step = 1
+    While step < size:
+        If active:
+            If rank % (2 * step) == 0:
+                If rank + step < size then:
+                    Receive sorted data from processor(rank + step) with MPI_Recv
+                    Merge this data with local data to make a larger sorted list
+            Else if rank % step == 0:
+                Send sorted local data to processor(rank - step) with MPI_Send
+                active = False  // Process becomes inactive but stays in the loop
+        Synchronize all processes with MPI_Barrier
+        step = step * 2
+
+    If rank == 0:
+        Output or store the fully sorted data in local data
+
+    Finalize MPI environment
+```
 
 ### 2c. Evaluation plan - what and how will you measure and compare
 - Input sizes, Input types
