@@ -20,7 +20,7 @@ Sample Sort(Mustafa):This is a divide-and-conquer sorting algorithm that is well
   
 Merge Sort(Sathvik): Merge Sort is a divide-and-conquer sorting algorithm that functions by recursively splitting the data set into smaller sublists, sorts them and then merges them together to create a fully sorted list. Merge Sort can use parallel architectures highly efficiently as the portions of data that the original data set is broken can be distributed across several processors which would allow for simultaneous sorting and merging of the sublists.
   
-Radix Sort:
+Radix Sort(Yusa): Radix Sort is a non-comparison-based sorting algorithm. It works by sorting numbers digit by digit, starting from the least significant digit to the most significant one. It's especially efficient for parallel computing because each digit can be sorted independently using counting sort or a similar linear-time algorithm. In this project, Radix Sort will be implemented and parallelized using MPI.
 
 Architectures and Tools:
 - Architecture: Distributed-memory systems using MPI on the Grace supercomputing platform.
@@ -149,6 +149,56 @@ Merge Sort(Sathvik):
         Output or store the fully sorted data in local data
 
     Finalize MPI environment
+```
+
+Radix Sort (Yusa):
+
+```text
+#### Radix Sort (Yusa):
+
+    Initialize MPI environment
+    Determine rank (process ID) and size (number of processes)
+    
+    If rank == 0 then
+        Generate/Read Full Data Set
+        Determine the maximum value in the dataset
+        Broadcast maximum value to all processes using MPI_Bcast
+    Else:
+        Receive the maximum value using MPI_Bcast
+    
+    Calculate the number of digits needed to represent the maximum value (for radix sorting)
+
+    for each digit (from least significant to most significant) do:
+
+        Perform local counting sort on the current digit:
+            Create a count array of size 10 (for base-10 digits)
+            for each element in local data do:
+                Extract the current digit
+                Increment the corresponding count in the count array
+        
+        Use MPI_Allreduce to combine local counts into global counts
+        Broadcast the global count to all processes using MPI_Allreduce
+
+        Calculate prefix sums across all processes:
+            Use MPI_Scan to calculate the prefix sum to determine the starting index for each process
+
+        Redistribute data based on the sorted order of the current digit:
+            for each process do:
+                Send sorted data chunks to the corresponding process using MPI_Send
+                Receive sorted data chunks from other processes using MPI_Recv
+
+        After redistribution, each process has sorted data based on the current digit
+
+    end for
+
+    If rank == 0 then
+        Gather the fully sorted data from all processes using MPI_Gather
+        Output the sorted data
+    Else:
+        Send the sorted local data to the root process using MPI_Gather
+
+    Finalize MPI environment
+
 ```
 
 ### 2c. Evaluation plan - what and how will you measure and compare
