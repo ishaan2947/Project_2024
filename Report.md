@@ -38,7 +38,7 @@ Architectures and Tools:
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
 
-Bitonic Sort (Ishaan):
+Bitonic Sort (Ishaan- UPDATED):
 
 ```text
 #### Bitonic Sort (Ishaan- UPDATED):
