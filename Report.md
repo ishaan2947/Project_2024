@@ -15,6 +15,13 @@ Note: We will communicate through imessage on our phones
 
 Bitonic Sort(Ishaan):This is a comparison-based sorting algorithm that is well-suited for parallel computing. It works by recursively sorting a sequence into a
 bitonic sequence and then merging it.This algorithm is ment to be highly efficient on parallel architectures due to its regular structure.
+
+Bitonic Sort Implementation Updates and Questions(Ishaan):
+- Implementing the parallel Bitonic Sort algorithm has been challenging, particularly in ensuring that data is correctly sorted across all processes.
+- I am using dir = ((rank >> (k + 1)) & 1) == 0 ? 1 : 0; to set the sorting direction. Is this the correct approach?
+- Could you provide some tips on a reliable method to determine the sorting direction based on rank and stage?
+- Can you verify if my implementation is correct? 
+
     
 Sample Sort(Mustafa):This is a divide-and-conquer sorting algorithm that is well-suited for parallel computation. This algorithm wokrs by picking a set of sample from the input using it to partition the data into smaller buckets and sorting each bucket individually. Sample sort is designed in such a way to minimize inter-process communication, making it highly scalable.
   
@@ -34,30 +41,52 @@ Architectures and Tools:
 Bitonic Sort (Ishaan):
 
 ```text
-#### Bitonic Sort (Ishaan):
+#### Bitonic Sort (Ishaan- UPDATED):
 
-    Initialize MPI environment
-    Determine rank (process ID) and size (number of processes)
-    Generate local portion of data
+Initialize MPI environment
+Determine rank (process ID) and size (number of processes)
+Generate local portion of data
 
-    Perform local sort on the data
+Perform local bitonic sort on the data:
+    - Recursively sort local data into a bitonic sequence
+    - Use compare-exchange operations to merge sequences
 
-    for k = 2 to number of processes step 2 do
-        for j = k / 2 down to 1 step 2 do
-            partner = rank XOR j
-            if rank < partner then
-                send data to partner using MPI_Send
-                receive data from partner using MPI_Recv
-                merge data in ascending order
+for k = 0 to log2(size) - 1 do // Stages
+    for j = k down to 0 do     // Steps within stages
+        mask = 1 << j
+        partner = rank XOR mask
+
+        Determine sorting direction:
+            if ((rank >> (k + 1)) & 1) == 0 then
+                dir = ASCENDING
             else
-                receive data from partner using MPI_Recv
-                send data to partner using MPI_Send
-                merge data in descending order
+                dir = DESCENDING
             end if
-        end for
-    end for
 
-    Finalize MPI environment
+        Exchange data with partner using MPI_Sendrecv
+
+        Perform compare-exchange with received data:
+            if rank < partner then
+                if dir == ASCENDING then
+                    Compare and keep lower elements
+                else
+                    Compare and keep higher elements
+                end if
+            else
+                if dir == ASCENDING then
+                    Compare and keep higher elements
+                else
+                    Compare and keep lower elements
+                end if
+            end if
+
+    end for
+end for
+
+Gather sorted data at root process using MPI_Gather
+
+Finalize MPI environment
+
 ```
 Sample Sort (Mustafa):
 
