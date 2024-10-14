@@ -15,6 +15,7 @@
 #include <math.h>                   // For log2()
 #include <caliper/cali.h>
 #include <caliper/cali-manager.h>
+#include <adiak.hpp>
 
 // Comparison function for compare-exchange
 void compare_exchange(int *data1, int *data2, int count, int dir)
@@ -67,6 +68,8 @@ void mpi_bitonic_sort(int *local_data, int local_n, int rank, int size)
     int *recv_data = (int *)malloc(local_n * sizeof(int));
     int partner;
 
+    CALI_MARK_BEGIN("comp");
+    CALI_MARK_BEGIN("comp_large");
     CALI_MARK_BEGIN("mpi_bitonic_sort");
 
     int logp = (int)log2(size);
@@ -81,13 +84,15 @@ void mpi_bitonic_sort(int *local_data, int local_n, int rank, int size)
             // Determine sorting direction
             int dir = ((rank >> (k + 1)) & 1) == 0 ? 1 : 0; // 1 for ascending, 0 for descending
 
-            CALI_MARK_BEGIN("communication");
+            CALI_MARK_BEGIN("comm");
+            CALI_MARK_BEGIN("comm_large");
             MPI_Sendrecv(local_data, local_n, MPI_INT, partner, 0,
                          recv_data, local_n, MPI_INT, partner, 0,
                          MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CALI_MARK_END("communication");
+            CALI_MARK_END("comm_large");
+            CALI_MARK_END("comm");
 
-            CALI_MARK_BEGIN("compare_exchange");
+            CALI_MARK_BEGIN("comp_small");
             if (rank < partner)
             {
                 if (dir == 1)
@@ -112,11 +117,13 @@ void mpi_bitonic_sort(int *local_data, int local_n, int rank, int size)
                     compare_exchange(local_data, recv_data, local_n, dir);
                 }
             }
-            CALI_MARK_END("compare_exchange");
+            CALI_MARK_END("comp_small");
         }
     }
 
     CALI_MARK_END("mpi_bitonic_sort");
+    CALI_MARK_END("comp_large");
+    CALI_MARK_END("comp");
 
     free(recv_data);
 }
@@ -138,6 +145,9 @@ int main(int argc, char *argv[])
     mgr.add("runtime-report");
     mgr.start();
 
+    // Start main region
+    CALI_MARK_BEGIN("main");
+
     // Get command line arguments
     if (argc >= 2)
     {
@@ -157,7 +167,6 @@ int main(int argc, char *argv[])
     }
 
     // Ensure that n is divisible by numtasks
-    // needed for algorithm to proerply work 
     if (n % numtasks != 0)
     {
         if (rank == 0)
@@ -169,9 +178,13 @@ int main(int argc, char *argv[])
     local_n = n / numtasks;
     local_data = (int *)malloc(local_n * sizeof(int));
 
+    // Data Initialization
     if (rank == 0)
     {
         data = (int *)malloc(n * sizeof(int));
+
+        // Data initialization region
+        CALI_MARK_BEGIN("data_init_runtime");
 
         // Initialize data (random data by default)
         srand(time(NULL));
@@ -214,15 +227,23 @@ int main(int argc, char *argv[])
             data[idx2] = temp;
         }
         */
+
+        CALI_MARK_END("data_init_runtime");
     }
 
     // Distribute data to all processes
+    CALI_MARK_BEGIN("comm");
+    CALI_MARK_BEGIN("comm_large");
     MPI_Scatter(data, local_n, MPI_INT, local_data, local_n, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_END("comm_large");
+    CALI_MARK_END("comm");
 
     // Local bitonic sort
-    CALI_MARK_BEGIN("local_sort");
+    CALI_MARK_BEGIN("comp");
+    CALI_MARK_BEGIN("comp_large");
     bitonic_sort_local(local_data, 0, local_n, 1);
-    CALI_MARK_END("local_sort");
+    CALI_MARK_END("comp_large");
+    CALI_MARK_END("comp");
 
     // Start timing after local sort
     MPI_Barrier(MPI_COMM_WORLD);
@@ -236,17 +257,26 @@ int main(int argc, char *argv[])
     end_time = MPI_Wtime();
 
     // Gather sorted data
+    CALI_MARK_BEGIN("comm");
+    CALI_MARK_BEGIN("comm_large");
     if (rank == 0)
     {
         MPI_Gather(MPI_IN_PLACE, local_n, MPI_INT, data, local_n, MPI_INT, 0, MPI_COMM_WORLD);
-
-        printf("Time taken: %f seconds\n", end_time - start_time);
-
-        free(data);
     }
     else
     {
         MPI_Gather(local_data, local_n, MPI_INT, data, local_n, MPI_INT, 0, MPI_COMM_WORLD);
+    }
+    CALI_MARK_END("comm_large");
+    CALI_MARK_END("comm");
+
+
+    if (rank == 0)
+    {
+
+        printf("Time taken: %f seconds\n", end_time - start_time);
+
+        free(data);
     }
 
     free(local_data);
@@ -254,6 +284,25 @@ int main(int argc, char *argv[])
     // Flush and stop Caliper
     mgr.flush();
     mgr.stop();
+
+    // Adiak metadata collection
+    adiak::init(NULL);
+    adiak::launchdate();    // Launch date of the job
+    adiak::libraries();     // Libraries used
+    adiak::cmdline();       // Command line used to launch the job
+    adiak::clustername();   // Name of the cluster
+    adiak::value("algorithm", "Bitonic"); // The name of the algorithm
+    adiak::value("programming_model", "MPI"); // Programming model used
+    adiak::value("data_type", "int"); // Data type of input elements
+    adiak::value("size_of_data_type", sizeof(int)); // Size of data type in bytes
+    adiak::value("input_size", n); // Number of elements in input dataset
+    adiak::value("input_type", "Random"); // Type of input data
+    adiak::value("num_procs", numtasks); // Number of processors (MPI ranks)
+    adiak::value("scalability", "strong"); // Scalability type ("strong" or "weak")
+    adiak::value("group_num", 21); // Group number
+    adiak::value("implementation_source", "Handwritten"); // Source of implementation
+
+    CALI_MARK_END("main");
 
     MPI_Finalize();
     return 0;
