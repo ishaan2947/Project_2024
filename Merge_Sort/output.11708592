@@ -1,0 +1,15 @@
+
+Inactive Modules:
+  1) UCX/1.9.0     2) numactl/2.0.13
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) binutils/2.35     2) zlib/1.2.11
+
+The following have been reloaded with a version change:
+  1) GCCcore/10.2.0 => GCCcore/8.3.0
+
+Sample of initial data:
+71876166 708592740 1483128881 907283241 442951012 537146758 1366999021 1854614940 647800535 53523743 
+Data is correctly sorted.
+Sample of sorted data:
+59338 866629 1130983 1571326 1681432 1857824 1870292 2195787 2558036 2663321 
