@@ -4,8 +4,6 @@
  *   MPI implementation of Bitonic Sort with Caliper instrumentation.
  * AUTHOR:
  *   Ishaan Nigam
- * LAST REVISED:
- *   ...
  ******************************************************************************/
 
 #include <mpi.h>
@@ -16,6 +14,7 @@
 #include <caliper/cali.h>
 #include <caliper/cali-manager.h>
 #include <adiak.hpp>
+#include <string>
 
 // Comparison function for compare-exchange
 void compare_exchange(int *data1, int *data2, int count, int dir)
@@ -68,8 +67,6 @@ void mpi_bitonic_sort(int *local_data, int local_n, int rank, int size)
     int *recv_data = (int *)malloc(local_n * sizeof(int));
     int partner;
 
-    CALI_MARK_BEGIN("comp");
-    CALI_MARK_BEGIN("comp_large");
     CALI_MARK_BEGIN("mpi_bitonic_sort");
 
     int logp = (int)log2(size);
@@ -87,8 +84,8 @@ void mpi_bitonic_sort(int *local_data, int local_n, int rank, int size)
             CALI_MARK_BEGIN("comm");
             CALI_MARK_BEGIN("comm_large");
             MPI_Sendrecv(local_data, local_n, MPI_INT, partner, 0,
-                         recv_data, local_n, MPI_INT, partner, 0,
-                         MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                        recv_data, local_n, MPI_INT, partner, 0,
+                        MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             CALI_MARK_END("comm_large");
             CALI_MARK_END("comm");
 
@@ -122,8 +119,6 @@ void mpi_bitonic_sort(int *local_data, int local_n, int rank, int size)
     }
 
     CALI_MARK_END("mpi_bitonic_sort");
-    CALI_MARK_END("comp_large");
-    CALI_MARK_END("comp");
 
     free(recv_data);
 }
@@ -152,6 +147,12 @@ int main(int argc, char *argv[])
     if (argc >= 2)
     {
         n = atoi(argv[1]);
+    }
+
+    std::string input_type = "random";
+    if (argc >= 3)
+    {
+        input_type = argv[2];
     }
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -186,47 +187,58 @@ int main(int argc, char *argv[])
         // Data initialization region
         CALI_MARK_BEGIN("data_init_runtime");
 
-        // Initialize data (random data by default)
-        srand(time(NULL));
-        for (int i = 0; i < n; i++)
+        // Initialize data based on input_type
+        if (input_type == "random")
         {
-            data[i] = rand() % n;
+            // Random data
+            srand(time(NULL));
+            for (int i = 0; i < n; i++)
+            {
+                data[i] = rand() % n;
+            }
         }
-
-        // Uncomment one of the following code blocks to initialize different input types
-
-        // Sorted data
-        /*
-        for (int i = 0; i < n; i++)
+        else if (input_type == "sorted")
         {
-            data[i] = i;
+            // Sorted data
+            for (int i = 0; i < n; i++)
+            {
+                data[i] = i;
+            }
         }
-        */
-
-        // Reverse sorted data
-        /*
-        for (int i = 0; i < n; i++)
+        else if (input_type == "reverse")
         {
-            data[i] = n - i;
+            // Reverse sorted data
+            for (int i = 0; i < n; i++)
+            {
+                data[i] = n - i;
+            }
         }
-        */
-
-        // Nearly sorted data (1% perturbation)
-        /*
-        for (int i = 0; i < n; i++)
+        else if (input_type == "nearly_sorted")
         {
-            data[i] = i;
+            // Nearly sorted data
+            for (int i = 0; i < n; i++)
+            {
+                data[i] = i;
+            }
+            int num_swaps = n / 100; // 1% perturbation
+            for (int i = 0; i < num_swaps; i++)
+            {
+                int idx1 = rand() % n;
+                int idx2 = rand() % n;
+                int temp = data[idx1];
+                data[idx1] = data[idx2];
+                data[idx2] = temp;
+            }
         }
-        int num_swaps = n / 100;
-        for (int i = 0; i < num_swaps; i++)
+        else
         {
-            int idx1 = rand() % n;
-            int idx2 = rand() % n;
-            int temp = data[idx1];
-            data[idx1] = data[idx2];
-            data[idx2] = temp;
+            // Default to random
+            srand(time(NULL));
+            for (int i = 0; i < n; i++)
+            {
+                data[i] = rand() % n;
+            }
         }
-        */
 
         CALI_MARK_END("data_init_runtime");
     }
@@ -238,6 +250,10 @@ int main(int argc, char *argv[])
     CALI_MARK_END("comm_large");
     CALI_MARK_END("comm");
 
+    // Synchronize all processes before starting the timer
+    MPI_Barrier(MPI_COMM_WORLD);
+    start_time = MPI_Wtime();
+
     // Local bitonic sort
     CALI_MARK_BEGIN("comp");
     CALI_MARK_BEGIN("comp_large");
@@ -245,14 +261,10 @@ int main(int argc, char *argv[])
     CALI_MARK_END("comp_large");
     CALI_MARK_END("comp");
 
-    // Start timing after local sort
-    MPI_Barrier(MPI_COMM_WORLD);
-    start_time = MPI_Wtime();
-
     // Perform the MPI bitonic sort
     mpi_bitonic_sort(local_data, local_n, rank, numtasks);
 
-    // End timing
+    // Synchronize all processes after sorting
     MPI_Barrier(MPI_COMM_WORLD);
     end_time = MPI_Wtime();
 
@@ -270,12 +282,9 @@ int main(int argc, char *argv[])
     CALI_MARK_END("comm_large");
     CALI_MARK_END("comm");
 
-
     if (rank == 0)
     {
-
         printf("Time taken: %f seconds\n", end_time - start_time);
-
         free(data);
     }
 
@@ -296,7 +305,7 @@ int main(int argc, char *argv[])
     adiak::value("data_type", "int"); // Data type of input elements
     adiak::value("size_of_data_type", sizeof(int)); // Size of data type in bytes
     adiak::value("input_size", n); // Number of elements in input dataset
-    adiak::value("input_type", "Random"); // Type of input data
+    adiak::value("input_type", input_type); // Type of input data
     adiak::value("num_procs", numtasks); // Number of processors (MPI ranks)
     adiak::value("scalability", "strong"); // Scalability type ("strong" or "weak")
     adiak::value("group_num", 21); // Group number
