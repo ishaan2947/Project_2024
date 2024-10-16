@@ -18,10 +18,8 @@ bitonic sequence and then merging it.This algorithm is ment to be highly efficie
 
 Bitonic Sort Implementation Updates and Questions(Ishaan):
 - Implementing the parallel Bitonic Sort algorithm has been challenging, particularly in ensuring that data is correctly sorted across all processes.
-- I am using dir = ((rank >> (k + 1)) & 1) == 0 ? 1 : 0; to set the sorting direction. Is this the correct approach?
-- Could you provide some tips on a reliable method to determine the sorting direction based on rank and stage?
-- Can you verify if my implementation is correct? 
-
+- Can you verify if my implementation is correct?
+- Implementation Description: In my implementation of the parallel bitonic sort algorithm, the input data is divided among multiple processes, each performing a local bitonic sort. At each stage, processes exchange data with a partner (determined by XORing their rank with a mask) and perform compare-exchange operations, retaining smaller or larger elements depending on the sorting direction. I used recursive merging to ensure local data is sorted before communication between processes. Once all stages are complete, the root process gathers the globally sorted data using MPI_Gather.
     
 Sample Sort(Mustafa):This is a divide-and-conquer sorting algorithm that is well-suited for parallel computation. This algorithm wokrs by picking a set of sample from the input using it to partition the data into smaller buckets and sorting each bucket individually. Sample sort is designed in such a way to minimize inter-process communication, making it highly scalable.
   
@@ -44,10 +42,14 @@ Bitonic Sort (Ishaan- UPDATED):
 #### Bitonic Sort (Ishaan- UPDATED):
 
 Initialize MPI environment
-Determine rank (process ID) and size (number of processes)
-Generate local portion of data
+    - MPI_Init to set up parallel processing
+    - Determine rank (process ID) and size (number of processes)
 
-Perform local bitonic sort on the data:
+Generate and distribute data:
+    - Rank 0 generates the global data (random, sorted, reverse, or nearly sorted)
+    - Scatter data to all processes using MPI_Scatter
+
+Perform local bitonic sort on the local data:
     - Recursively sort local data into a bitonic sequence
     - Use compare-exchange operations to merge sequences
 
@@ -63,29 +65,35 @@ for k = 0 to log2(size) - 1 do // Stages
                 dir = DESCENDING
             end if
 
-        Exchange data with partner using MPI_Sendrecv
+        Exchange data with partner:
+            - Use MPI_Sendrecv to exchange local data with the partner process
 
         Perform compare-exchange with received data:
             if rank < partner then
                 if dir == ASCENDING then
-                    Compare and keep lower elements
+                    Compare and keep lower elements in the local array
                 else
-                    Compare and keep higher elements
+                    Compare and keep higher elements in the local array
                 end if
             else
                 if dir == ASCENDING then
-                    Compare and keep higher elements
+                    Compare and keep higher elements in the local array
                 else
-                    Compare and keep lower elements
+                    Compare and keep lower elements in the local array
                 end if
             end if
 
     end for
 end for
 
-Gather sorted data at root process using MPI_Gather
+Synchronize all processes using MPI_Barrier
 
-Finalize MPI environment
+Gather sorted data at the root process using MPI_Gather
+
+Print execution time at root
+
+Finalize MPI environment using MPI_Finalize
+
 
 ```
 Sample Sort (Mustafa):
