@@ -152,21 +152,21 @@ Finalize MPI environment
 
 ```
 
-Merge Sort(Sathvik):
+Merge Sort(Sathvik - UPDATED):
 ```text
-#### Merge Sort(Sathvik):
-
+#### Merge Sort(Sathvik - UPDATED):
     Initialize MPI environment
     Determine rank (process ID) and size (number of processes)
 
     If rank == 0:
-        Generate/Read Full Data Set
+        Generate/Read Full Data Set based on input_type
         Divide the data set into equal chunks
-        Distribute chunks to all processors including itself with MPI_Send
+        Distribute chunks to all processors including itself with MPI_Scatterv
+        Print a sample of the initial data
     Else:
-        Receive chunk of data using MPI_Recv
+        Receive chunk of data using MPI_Scatterv
 
-    Perform local sort on recieved data (Ex. Quicksort)
+    Perform local sort on received data (e.g., Quicksort)
 
     active = True
     step = 1
@@ -174,16 +174,20 @@ Merge Sort(Sathvik):
         If active:
             If rank % (2 * step) == 0:
                 If rank + step < size then:
+                    Exchange sizes with processor(rank + step) using MPI_Sendrecv
                     Receive sorted data from processor(rank + step) with MPI_Recv
                     Merge this data with local data to make a larger sorted list
-            Else if rank % step == 0:
+            Else if rank % (2 * step) == step:
+                Send size to processor(rank - step) using MPI_Sendrecv
                 Send sorted local data to processor(rank - step) with MPI_Send
                 active = False  // Process becomes inactive but stays in the loop
         Synchronize all processes with MPI_Barrier
         step = step * 2
 
     If rank == 0:
+        Verify that data is correctly sorted
         Output or store the fully sorted data in local data
+        Print a sample of the sorted data
 
     Finalize MPI environment
 ```
