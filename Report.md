@@ -99,7 +99,7 @@ Finalize MPI environment using MPI_Finalize
 Sample Sort (Mustafa):
 
 ```text
-#### Sample Sort (Mustafa):
+#### Sample Sort (Mustafa - UPDATED):
 
     Initialize MPI environment
 Determine rank (process ID) and size (number of processes)
