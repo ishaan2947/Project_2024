@@ -192,53 +192,75 @@ Merge Sort(Sathvik - UPDATED):
     Finalize MPI environment
 ```
 
-Radix Sort (Yusa):
+Radix Sort (Yusa - Updated):
 
 ```text
 #### Radix Sort (Yusa):
 
     Initialize MPI environment
-    Determine rank (process ID) and size (number of processes)
-    
+Determine rank (process ID) and size (number of processes)
+
+If rank == 0 then
+    Generate/Read full data set 'data' based on 'input_type'
+Else
+    data remains uninitialized (NULL)
+
+Ensure total number of elements 'n' is divisible by 'size'
+If not divisible then
     If rank == 0 then
-        Generate/Read Full Data Set
-        Determine the maximum value in the dataset
-        Broadcast maximum value to all processes using MPI_Bcast
-    Else:
-        Receive the maximum value using MPI_Bcast
-    
-    Calculate the number of digits needed to represent the maximum value (for radix sorting)
-
-    for each digit (from least significant to most significant) do:
-
-        Perform local counting sort on the current digit:
-            Create a count array of size 10 (for base-10 digits)
-            for each element in local data do:
-                Extract the current digit
-                Increment the corresponding count in the count array
-        
-        Use MPI_Allreduce to combine local counts into global counts
-        Broadcast the global count to all processes using MPI_Allreduce
-
-        Calculate prefix sums across all processes:
-            Use MPI_Scan to calculate the prefix sum to determine the starting index for each process
-
-        Redistribute data based on the sorted order of the current digit:
-            for each process do:
-                Send sorted data chunks to the corresponding process using MPI_Send
-                Receive sorted data chunks from other processes using MPI_Recv
-
-        After redistribution, each process has sorted data based on the current digit
-
-    end for
-
-    If rank == 0 then
-        Gather the fully sorted data from all processes using MPI_Gather
-        Output the sorted data
-    Else:
-        Send the sorted local data to the root process using MPI_Gather
-
+        Output error message: "Array size must be divisible by number of processes."
     Finalize MPI environment
+    Exit program
+
+Calculate local number of elements 'local_n' as 'n / size'
+Allocate memory for 'local_data' with size 'local_n'
+
+If rank == 0 then
+    // Data Initialization Region (Caliper annotated as 'data_init_runtime')
+    Initialize 'data' based on 'input_type' (e.g., random, sorted, reverse)
+
+Distribute data to all processes using MPI_Scatter:
+    Each process receives 'local_n' elements into 'local_data' from 'data'
+
+Compute local maximum value 'local_max' from 'local_data'
+
+Compute global maximum value 'global_max' using MPI_Allreduce with MPI_MAX on 'local_max'
+
+Synchronize all processes using MPI_Barrier
+Record 'start_time' using MPI_Wtime()
+
+for each digit position 'exp' (starting from 1, while 'global_max / exp > 0') do:
+
+    Perform local counting sort on 'local_data' based on current digit 'exp'
+
+    Gather all sorted subarrays at root process using MPI_Gather:
+        Root process collects sorted 'local_data' from all processes into 'gathered_data'
+
+    If rank == 0 then
+        Perform counting sort on 'gathered_data' based on current digit 'exp'
+
+    Scatter the globally sorted data back to all processes using MPI_Scatter:
+        Each process updates 'local_data' with its portion of 'gathered_data'
+
+    If rank == 0 then
+        Free memory allocated for 'gathered_data'
+
+end for
+
+Synchronize all processes using MPI_Barrier
+Record 'end_time' using MPI_Wtime()
+
+Gather final sorted data at root process using MPI_Gather:
+    Root process collects 'local_data' from all processes into 'data'
+
+If rank == 0 then
+    Output total time taken: 'end_time - start_time'
+    Optionally, verify correctness of 'data'
+    Free memory allocated for 'data'
+
+Free memory allocated for 'local_data'
+
+Finalize MPI environment
 
 ```
 
