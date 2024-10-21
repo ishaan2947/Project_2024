@@ -371,8 +371,7 @@ Scaling Experiments:
 
 #### 2. Analysis of Results
 
-1. Strong Scaling Analysis  
-Key Insights:  
+1. Strong Scaling Analysis   
 
 Large array sizes scale well. As seen in the strong scaling plots, particularly for larger arrays like 67108864 and 268435456, my implementation achieves good scaling. This is because the larger problem sizes allow for more efficient distribution of computation across processors, with the communication overhead being reduced over more work. This is because larger data sets provide enough work per processor to make communication less of a bottleneck. It seems that the processors spend more time working on sorting rather than communicating with each other, leading to better speedup as you add more processors.  
 
@@ -381,15 +380,13 @@ Small array sizes suffer from communication overhead. For smaller arrays, the sp
 Input type matters. The sorted and nearly sorted input types consistently show the best strong scaling performance, while reverse and random inputs perform worse, especially for small array sizes. For ordered data, the algorithm requires fewer comparisons and exchanges, allowing it to scale better. For disordered data, the frequent comparisons and exchanges lead to more communication overhead, which limits scalability.  
 
 2. Weak Scaling Analysis  
-Key Insights:  
 
 Weak scaling holds for sorted and nearly sorted inputs. In the combined weak scaling plots, the performance of my algorithm for sorted and nearly sorted inputs shows nearly ideal weak scaling behavior. The runtime increases linearly as more processors are added and the problem size increases proportionally. Ordered data leads to fewer inter-processor data exchanges, allowing my bitonic sort algorithm to maintain an even workload per processor as the problem size scales with the number of processors.  
 
 Random and reverse inputs have poor weak scaling. For random and reverse inputs, the runtime increases sharply as the number of processors grows. This indicates that my implementation doesn’t scale well for disordered data when the problem size is increased proportionally with the number of processors. Disordered inputs require more communication between processors, which doesn’t scale efficiently as the problem size grows.  
 
-3. Communication Overhead  
-Key Insights:  
-
+3. Communication Overhead
+4. 
 Communication is the bottleneck for disordered data. Across both strong and weak scaling plots, it’s clear that communication overhead is the primary bottleneck, especially for random and reverse inputs. The MPI_Sendrecv calls between processors increase significantly for disordered data, limiting the algorithm's scalability. In the bitonic sort algorithm, communication between processors is necessary to exchange data and merge sorted subarrays. For disordered data, especially reverse and random, the number of exchanges increases substantially, causing the communication cost to dominate the overall runtime.  
 
 Sorted and nearly sorted inputs minimize communication. Ordered data requires fewer data exchanges, leading to better performance. This is shown in both strong and weak scaling plots, where sorted and nearly sorted inputs achieve the best speedup. The bitonic sort algorithm can operate more efficiently when the data is already partially sorted because fewer data exchanges are needed to reach the final sorted state.
