@@ -298,6 +298,38 @@ Scaling Experiments:
       - Plan: Each processor should have 1000 values to sort through, so 2 processors would have 512 values while 32 processors
       would have 16384 values to sort. Keeping the problem size proportially constant to the number of processes.
 
+
+
+### Performance Evaluation
+
+#### 1. Bitonic Sort (Ishaan)
+
+**Graphs:**  
+- **Main:**
+  - Strong Scaling Plots for Each Input Size:
+    ![image](https://github.com/user-attachments/assets/90f9be74-3376-4277-a7c4-c4f1c612f17c)
+
+  - Strong Scaling Speedup Plots
+  - Weak Scaling Plots (Combined on One Graph)
+
+- **Comm:**
+  - Strong Scaling Plots for Each Input Size
+  - Strong Scaling Speedup Plots
+  - Weak Scaling Plots (Combined on One Graph)
+
+- **Comm_Large:**
+  - Strong Scaling Plots for Each Input Size
+  - Strong Scaling Speedup Plots
+  - Weak Scaling Plots (Combined on One Graph)
+
+#### 2. Analysis of Results
+- 
+
+
+
+
+
+
 ### 3a. Caliper instrumentation
 Please use the caliper build `/scratch/group/csce435-f24/Caliper/caliper/share/cmake/caliper` 
 (same as lab2 build.sh) to collect caliper files for each experiment you run.
