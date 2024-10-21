@@ -315,7 +315,7 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/24b5168e-71b3-4347-a502-7242beb8a7ab)
     ![image](https://github.com/user-attachments/assets/41fe5e14-9e14-4a7e-bfa7-3f5db0cfd7cb)
     ![image](https://github.com/user-attachments/assets/7b425933-0c3a-46b7-8715-ac5194ad666a)
-    ![image](https://github.com/user-attachments/assets/6e5fab08-9f81-49a2-b78f-51579227fa64)
+    ![image](https://github.com/user-attachments/assets/6e5fab08-9f81-49a2-b78f-51579227fa64) .
     
   - Strong Scaling Speedup Plots    
     ![image](https://github.com/user-attachments/assets/929f0222-c974-418f-b989-27c235fb1d46)
