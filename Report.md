@@ -308,19 +308,41 @@ Scaling Experiments:
 - **Main:**
   - Strong Scaling Plots for Each Input Size:
     ![image](https://github.com/user-attachments/assets/90f9be74-3376-4277-a7c4-c4f1c612f17c)
+    ![image](https://github.com/user-attachments/assets/fc34298e-f325-4975-9e0b-4ea61f632ff5)
+    ![image](https://github.com/user-attachments/assets/2c86e321-bd21-48b7-99a3-f0a8ecf38813)
+    ![image](https://github.com/user-attachments/assets/24b5168e-71b3-4347-a502-7242beb8a7ab)
+    ![image](https://github.com/user-attachments/assets/41fe5e14-9e14-4a7e-bfa7-3f5db0cfd7cb)
+    ![image](https://github.com/user-attachments/assets/7b425933-0c3a-46b7-8715-ac5194ad666a)
+    ![image](https://github.com/user-attachments/assets/6e5fab08-9f81-49a2-b78f-51579227fa64)
 
   - Strong Scaling Speedup Plots
+    ![image](https://github.com/user-attachments/assets/929f0222-c974-418f-b989-27c235fb1d46)
+    ![image](https://github.com/user-attachments/assets/8ddd0a27-efcd-407f-be8c-2e6dff5bb0bb)
+    ![image](https://github.com/user-attachments/assets/e200960f-4f64-416c-961b-296222e28144)
+    ![image](https://github.com/user-attachments/assets/5e0763a2-b54f-41f8-ba61-f182a811d2aa)
+
+
+
+
   - Weak Scaling Plots (Combined on One Graph)
+    ![image](https://github.com/user-attachments/assets/436e7872-c938-42b3-a73e-45faaa934647)
+
+    
 
 - **Comm:**
   - Strong Scaling Plots for Each Input Size
   - Strong Scaling Speedup Plots
+    
   - Weak Scaling Plots (Combined on One Graph)
+    ![image](https://github.com/user-attachments/assets/21d1a8b1-92e9-43ad-8c14-76d304b3e89c)
+
 
 - **Comm_Large:**
   - Strong Scaling Plots for Each Input Size
   - Strong Scaling Speedup Plots
   - Weak Scaling Plots (Combined on One Graph)
+    ![image](https://github.com/user-attachments/assets/80def428-eb57-4a36-bafa-314dc92b20bb)
+
 
 #### 2. Analysis of Results
 - 
