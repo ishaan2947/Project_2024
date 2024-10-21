@@ -316,14 +316,15 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/41fe5e14-9e14-4a7e-bfa7-3f5db0cfd7cb)
     ![image](https://github.com/user-attachments/assets/7b425933-0c3a-46b7-8715-ac5194ad666a)
     ![image](https://github.com/user-attachments/assets/6e5fab08-9f81-49a2-b78f-51579227fa64)
+    
   - Strong Scaling Speedup Plots    
     ![image](https://github.com/user-attachments/assets/929f0222-c974-418f-b989-27c235fb1d46)
     ![image](https://github.com/user-attachments/assets/8ddd0a27-efcd-407f-be8c-2e6dff5bb0bb)
     ![image](https://github.com/user-attachments/assets/e200960f-4f64-416c-961b-296222e28144)
     ![image](https://github.com/user-attachments/assets/5e0763a2-b54f-41f8-ba61-f182a811d2aa)
+    
   - Weak Scaling Plots (Combined on One Graph)
     ![image](https://github.com/user-attachments/assets/436e7872-c938-42b3-a73e-45faaa934647)
-
     
 
 - **Comm:**
@@ -335,11 +336,13 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/d0fa6395-790c-4920-b6af-cbbb2ae3416a)
     ![image](https://github.com/user-attachments/assets/5878600e-4590-4f33-a1b2-f73da756ec1b)
     ![image](https://github.com/user-attachments/assets/d3455ba2-742e-4ff7-b931-6cf26ca243cf)
+    
   - Strong Scaling Speedup Plots
     ![image](https://github.com/user-attachments/assets/d3a9e45a-af7b-4de8-a644-52d0de6aeb3d)
     ![image](https://github.com/user-attachments/assets/d9b996c3-847e-4765-a41a-cb9195e7c1e1)
     ![image](https://github.com/user-attachments/assets/6aa599a7-fa0a-4877-a893-19500e3da366)
-    ![image](https://github.com/user-attachments/assets/ec215de6-1b9d-4b05-817e-cfe03991ee66)    
+    ![image](https://github.com/user-attachments/assets/ec215de6-1b9d-4b05-817e-cfe03991ee66)
+      
   - Weak Scaling Plots (Combined on One Graph)
     ![image](https://github.com/user-attachments/assets/21d1a8b1-92e9-43ad-8c14-76d304b3e89c)
 
@@ -353,11 +356,13 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/2a772bbd-f1fc-40c5-ba87-fbe945d05b99)
     ![image](https://github.com/user-attachments/assets/dda8176e-5b6c-4249-93ab-151e4a55b4c3)
     ![image](https://github.com/user-attachments/assets/1566a511-d845-48d5-ab43-bcfdd4d680c0)
+    
   - Strong Scaling Speedup Plots
     ![image](https://github.com/user-attachments/assets/44d56456-8ab8-4f2b-b742-c0a2a05b2228)
     ![image](https://github.com/user-attachments/assets/131a9716-99a4-4a8d-bbfc-019045e40682)
     ![image](https://github.com/user-attachments/assets/2ecaecd9-adb1-408c-971f-69434963dad8)
     ![image](https://github.com/user-attachments/assets/aa97a0f9-a4c9-4177-9aab-0cfffaf3e660)
+    
   - Weak Scaling Plots (Combined on One Graph)
     ![image](https://github.com/user-attachments/assets/80def428-eb57-4a36-bafa-314dc92b20bb)
 
