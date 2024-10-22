@@ -369,7 +369,7 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/80def428-eb57-4a36-bafa-314dc92b20bb)  .
 
 
-#### 2. Analysis of Results
+#### 2. Analysis of Results - Bitonic Sort (Ishaan)
 
 1. Strong Scaling Analysis   
 
