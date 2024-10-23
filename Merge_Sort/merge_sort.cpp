@@ -11,61 +11,68 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    //Begin Caliper main region
+    // Begin Caliper main region
     CALI_MARK_BEGIN("main");
 
-    //Initialize MPI environment
+    // Initialize MPI environment
     MPI_Init(&argc, &argv);
 
-    //Initialize Caliper and Adiak
+    // Initialize Caliper and Adiak
     cali_init();
     adiak::init(NULL);
 
-    //Get the rank and size of the MPI world
+    // Get the rank and size of the MPI world
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    //Define variables for Adiak metadata
+    // Define variables for Adiak metadata
     string algorithm = "merge";
     string programmingModel = "mpi";
     string dataType = "int";
     int dataTypeSize = sizeof(int);
     long long inputSize = 0;
-    string inputType = "Random"; //Default input type
+    string inputType = "Random"; // Default input type
     int numProcs = size;
-    string scalability = "strong"; //Adjust if needed
-    int groupNumber = 21; //Your group number
-    string implementationSource = "handwritten"; //As per project requirements
+    string scalability = "strong"; // Adjust if needed
+    int groupNumber = 21; // Your group number
+    string implementationSource = "handwritten"; // As per project requirements
 
-    //Parse command-line arguments
+    // Parse command-line arguments
     if (argc >= 2) {
         inputSize = atoll(argv[1]);
+        if (argc >= 3) {
+            inputType = argv[2];
+        }
     } else {
         if (rank == 0) {
-            cerr << "Usage: " << argv[0] << " input_size" << endl;
+            cerr << "Usage: " << argv[0] << " input_size [input_type]" << endl;
         }
         MPI_Finalize();
         return EXIT_FAILURE;
     }
 
-    //Determine input type and broadcast to all processes
+    // Determine input type and broadcast to all processes
     if (rank == 0) {
-        //Set inputType; can be adjusted as needed
-        inputType = "Random"; //Options: "Random", "Sorted", etc.
+        // Validate inputType
+        if (inputType != "Random" && inputType != "Sorted" && inputType != "ReverseSorted" && inputType != "1_perc_perturbed") {
+            cerr << "Unknown input_type: " << inputType << endl;
+            MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+        }
     }
     char inputTypeCStr[50];
     if (rank == 0) {
         strncpy(inputTypeCStr, inputType.c_str(), 50);
     }
+    // Broadcast inputType (small communication, not annotated)
     MPI_Bcast(inputTypeCStr, 50, MPI_CHAR, 0, MPI_COMM_WORLD);
     inputType = string(inputTypeCStr);
 
-    //Collect Adiak metadata
+    // Collect Adiak metadata
     adiak::launchdate();
     adiak::libraries();
 
-    //Construct the command line used
+    // Construct the command line used
     string cmdLine = argv[0];
     for (int i = 1; i < argc; ++i) {
         cmdLine += " ";
@@ -84,11 +91,11 @@ int main(int argc, char *argv[]) {
     adiak::value("group_num", groupNumber);
     adiak::value("implementation_source", implementationSource);
 
-    //Initialize local data variables
+    // Initialize local data variables
     vector<int> localData;
     int localSize = 0;
 
-    //Data initialization on root
+    // Data initialization on root process
     CALI_MARK_BEGIN("data_init_runtime");
     vector<int> data;
     vector<int> sendCounts(size);
@@ -96,7 +103,7 @@ int main(int argc, char *argv[]) {
 
     if (rank == 0) {
         data.resize(inputSize);
-        //Generate data based on inputType
+        // Generate data based on inputType
         if (inputType == "Random") {
             srand(42);
             for (long long i = 0; i < inputSize; ++i) {
@@ -127,7 +134,7 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
 
-        //Calculate sendCounts and displacements for scattering
+        // Calculate sendCounts and displacements for scattering
         long long avgSize = inputSize / size;
         long long remainder = inputSize % size;
         long long offset = 0;
@@ -137,84 +144,77 @@ int main(int argc, char *argv[]) {
             offset += sendCounts[i];
         }
 
-        //Print sample of the initial data
+        // Print a sample of the initial data
         cout << "Sample of initial data:" << endl;
         for (int i = 0; i < min(10LL, inputSize); ++i) {
             cout << data[i] << " ";
         }
         cout << endl;
     }
+    CALI_MARK_END("data_init_runtime");
 
-    //Broadcast sendCounts to all processes
+    // Broadcast sendCounts to all processes (small communication, not annotated)
     MPI_Bcast(sendCounts.data(), size, MPI_INT, 0, MPI_COMM_WORLD);
     localSize = sendCounts[rank];
     localData.resize(localSize);
 
-    //Distribute data among processes
+    // Distribute data among processes
     CALI_MARK_BEGIN("comm");
-    CALI_MARK_BEGIN("comm_large");
     MPI_Scatterv(rank == 0 ? data.data() : NULL, sendCounts.data(), displacements.data(), MPI_INT,
                  localData.data(), localSize, MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("comm_large");
     CALI_MARK_END("comm");
-    CALI_MARK_END("data_init_runtime");
 
-    //Perform local sorting
-    CALI_MARK_BEGIN("comp");
+    // Perform local sorting
     CALI_MARK_BEGIN("comp_large");
     sort(localData.begin(), localData.end());
     CALI_MARK_END("comp_large");
-    CALI_MARK_END("comp");
 
-    //Merging
+    // Merging phase
     int active = 1;
     int step = 1;
     while (step < size) {
         if (active) {
             if (rank % (2 * step) == 0) {
                 if (rank + step < size) {
-                    //Receive data from neighbor
-                    CALI_MARK_BEGIN("comm");
-                    CALI_MARK_BEGIN("comm_large");
+                    // Exchange sizes with neighbor (small communication, not annotated)
                     int recvSize;
                     MPI_Sendrecv(&localSize, 1, MPI_INT, rank + step, 0,
                                  &recvSize, 1, MPI_INT, rank + step, 0,
                                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                    // Receive data from neighbor
                     vector<int> recvData(recvSize);
+                    CALI_MARK_BEGIN("comm");
                     MPI_Recv(recvData.data(), recvSize, MPI_INT, rank + step, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    CALI_MARK_END("comm_large");
                     CALI_MARK_END("comm");
 
-                    //Merge received data with local data
-                    CALI_MARK_BEGIN("comp");
+                    // Merge data
                     CALI_MARK_BEGIN("comp_large");
                     vector<int> mergedData(localSize + recvSize);
                     merge(localData.begin(), localData.end(), recvData.begin(), recvData.end(), mergedData.begin());
                     localData = mergedData;
                     localSize = localData.size();
                     CALI_MARK_END("comp_large");
-                    CALI_MARK_END("comp");
                 }
             } else if (rank % (2 * step) == step) {
-                //Send data to neighbor
-                CALI_MARK_BEGIN("comm");
-                CALI_MARK_BEGIN("comm_large");
+                // Send size to neighbor (small communication, not annotated)
                 MPI_Sendrecv(&localSize, 1, MPI_INT, rank - step, 0,
                              NULL, 0, MPI_INT, MPI_PROC_NULL, 0,
                              MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                // Send data to neighbor
+                CALI_MARK_BEGIN("comm");
                 MPI_Send(localData.data(), localSize, MPI_INT, rank - step, 0, MPI_COMM_WORLD);
-                CALI_MARK_END("comm_large");
                 CALI_MARK_END("comm");
-                active = 0; //Process becomes inactive
+                active = 0; // Process becomes inactive
             }
         }
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD); // Synchronization (not annotated)
         step *= 2;
     }
 
-    //Check if data is correctly sorted
+    // Correctness check
     if (rank == 0) {
-        CALI_MARK_BEGIN("correctness_check");
         bool isCorrect = true;
         for (size_t i = 1; i < localData.size(); ++i) {
             if (localData[i - 1] > localData[i]) {
@@ -222,13 +222,15 @@ int main(int argc, char *argv[]) {
                 break;
             }
         }
+
+        CALI_MARK_BEGIN("correctness_check");
         if (isCorrect) {
             cout << "Data is correctly sorted." << endl;
         } else {
             cout << "Data is not correctly sorted." << endl;
         }
 
-        //Print a sample of the sorted data
+        // Print a sample of the sorted data
         cout << "Sample of sorted data:" << endl;
         for (size_t i = 0; i < min(size_t(10), localData.size()); ++i) {
             cout << localData[i] << " ";
@@ -237,13 +239,13 @@ int main(int argc, char *argv[]) {
         CALI_MARK_END("correctness_check");
     }
 
-    //Finalize Adiak and Caliper
+    // Finalize Adiak and Caliper
     adiak::fini();
 
-    //Finalize MPI 
+    // Finalize MPI environment
     MPI_Finalize();
 
-    //End Caliper main region
+    // End Caliper main region
     CALI_MARK_END("main");
 
     return EXIT_SUCCESS;

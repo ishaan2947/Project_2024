@@ -390,3 +390,21 @@ Random and reverse inputs have poor weak scaling. For random and reverse inputs,
 Communication is the bottleneck for disordered data. Across both strong and weak scaling plots, it’s clear that communication overhead is the primary bottleneck, especially for random and reverse inputs. The MPI_Sendrecv calls between processors increase significantly for disordered data, limiting the algorithm's scalability. In the bitonic sort algorithm, communication between processors is necessary to exchange data and merge sorted subarrays. For disordered data, especially reverse and random, the number of exchanges increases substantially, causing the communication cost to dominate the overall runtime.  
 
 Sorted and nearly sorted inputs minimize communication. Ordered data requires fewer data exchanges, leading to better performance. This is shown in both strong and weak scaling plots, where sorted and nearly sorted inputs achieve the best speedup. The bitonic sort algorithm can operate more efficiently when the data is already partially sorted because fewer data exchanges are needed to reach the final sorted state.
+
+
+#### 1. Merge Sort (Sathvik)
+
+**Example Graph(Temporary):** 
+
+![image](https://github.com/user-attachments/assets/e200960f-4f64-416c-961b-296222e28144)
+
+#### 2. Analysis of Results
+
+1. Strong Scaling Analysis 
+The algorithm that I have written, Merge Sort, shows good and clear scalability for the runs with larger array sizes such as the ones with 2^26 and 2^28 elements where this increasing in processing decreases the overall execution time. The improvement in the time for execution stems from the algorithm having each processor handling the proper amount of data while also hosting an efficient merging process. On the other hand, with smaller sized arrays, the impact of the scaling isn't as noticeable as the lower amount of elements means that each processor's workload is too low to bring more computational gain than there is overhead from the communication. Essentially this means a lowered amount of performance improvenemnt for these arrays.
+
+2. Weak Scaling Analysis
+For this merge sort algorithm, whenever both the problem size and the input size increases proportionally, the algorithm performs very well on large sets of input. In these cases the execution times have stayed stable as the overall workload is evenly distributed creating a balanced performance. Based on the data, the merged data seems to be scaling somewhat logarithmically as it maintains efficient communication even with increased processors. Although, it is noticeable that there could be variances in the time based on the differences in local sorting times for highly varied data, but overall, weak scaling is still good.
+
+3. Communication Overhead
+In a parallel merge sort algorithm, the communication overhead exists within the distribution of the data amongst all of the processors as well as the merging of the subarrays. This overhead has a much more significant impact upon smaller inputs as the work that is split up amongst the processors isn't enought to outweigh this overhead by a lot. On the otherhand, with inputs that are much larger, the overhead becomes a welcome cost as the speedup caused by the distributed it work causes the sorting to occur much more quickly. In addition, in the algorithm, the use of Scatterv ensures that the distribution of the data as well as the communication during merging will be efficient.
