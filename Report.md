@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/786f6c3c-26ab-463b-9afc-f58052bb3026)# CSCE 435 Group project
+# CSCE 435 Group project
 
 ## 0. Group number: 21
 
