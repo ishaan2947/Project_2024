@@ -1,4 +1,4 @@
-# CSCE 435 Group project
+![image](https://github.com/user-attachments/assets/786f6c3c-26ab-463b-9afc-f58052bb3026)# CSCE 435 Group project
 
 ## 0. Group number: 21
 
@@ -317,11 +317,11 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/7b425933-0c3a-46b7-8715-ac5194ad666a)
     ![image](https://github.com/user-attachments/assets/6e5fab08-9f81-49a2-b78f-51579227fa64) .
     
-  - Strong Scaling Speedup Plots    
-    ![image](https://github.com/user-attachments/assets/929f0222-c974-418f-b989-27c235fb1d46)
-    ![image](https://github.com/user-attachments/assets/8ddd0a27-efcd-407f-be8c-2e6dff5bb0bb)
-    ![image](https://github.com/user-attachments/assets/e200960f-4f64-416c-961b-296222e28144)  
-    ![image](https://github.com/user-attachments/assets/5e0763a2-b54f-41f8-ba61-f182a811d2aa)  .
+  - Strong Scaling Speedup Plots
+    ![image](https://github.com/user-attachments/assets/460e1573-1249-4685-b49a-a3d7633f3f90)
+    ![image](https://github.com/user-attachments/assets/b8b755be-c40c-4d51-9962-3a1d4821f336)
+    ![image](https://github.com/user-attachments/assets/8f90baf7-1f80-49f6-a469-c9d53842cdc8)
+    ![image](https://github.com/user-attachments/assets/7a8f68f2-495f-426d-8803-319322c229f5)  .
     
   - Weak Scaling Plots (Combined on One Graph)
     ![image](https://github.com/user-attachments/assets/436e7872-c938-42b3-a73e-45faaa934647)  .
@@ -339,10 +339,10 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/d3455ba2-742e-4ff7-b931-6cf26ca243cf)  .
     
   - Strong Scaling Speedup Plots
-    ![image](https://github.com/user-attachments/assets/d3a9e45a-af7b-4de8-a644-52d0de6aeb3d)
-    ![image](https://github.com/user-attachments/assets/d9b996c3-847e-4765-a41a-cb9195e7c1e1)
-    ![image](https://github.com/user-attachments/assets/6aa599a7-fa0a-4877-a893-19500e3da366)
-    ![image](https://github.com/user-attachments/assets/ec215de6-1b9d-4b05-817e-cfe03991ee66)  .
+    ![image](https://github.com/user-attachments/assets/ec4d1147-246c-4b57-a7af-6d9f52827183)
+    ![image](https://github.com/user-attachments/assets/d8b1c7e0-6453-45ea-a245-71d903008f70)
+    ![image](https://github.com/user-attachments/assets/bdbc6e6e-2420-4dc1-8bbb-52aecdaff6e8)
+    ![image](https://github.com/user-attachments/assets/d2689944-3080-43fc-9024-68a6df8ccc91) .
       
   - Weak Scaling Plots (Combined on One Graph)
     ![image](https://github.com/user-attachments/assets/21d1a8b1-92e9-43ad-8c14-76d304b3e89c)  .
@@ -360,10 +360,10 @@ Scaling Experiments:
     ![image](https://github.com/user-attachments/assets/1566a511-d845-48d5-ab43-bcfdd4d680c0)  .
     
   - Strong Scaling Speedup Plots
-    ![image](https://github.com/user-attachments/assets/44d56456-8ab8-4f2b-b742-c0a2a05b2228)
-    ![image](https://github.com/user-attachments/assets/131a9716-99a4-4a8d-bbfc-019045e40682)
-    ![image](https://github.com/user-attachments/assets/2ecaecd9-adb1-408c-971f-69434963dad8)
-    ![image](https://github.com/user-attachments/assets/aa97a0f9-a4c9-4177-9aab-0cfffaf3e660)  .
+    ![image](https://github.com/user-attachments/assets/d6b20e34-2504-4907-b98f-3edf88124c5d)
+    ![image](https://github.com/user-attachments/assets/8937d18b-7a05-4ce5-9df0-25ba8eb2e5de)
+    ![image](https://github.com/user-attachments/assets/f6cc7a1e-5209-4beb-a688-25b19c727c96)
+    ![image](https://github.com/user-attachments/assets/b2af323b-ed65-4974-87dc-bc961e44b9bc)   .
     
   - Weak Scaling Plots (Combined on One Graph)
     ![image](https://github.com/user-attachments/assets/80def428-eb57-4a36-bafa-314dc92b20bb)  .
