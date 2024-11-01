@@ -408,3 +408,37 @@ For this merge sort algorithm, whenever both the problem size and the input size
 
 3. Communication Overhead
 In a parallel merge sort algorithm, the communication overhead exists within the distribution of the data amongst all of the processors as well as the merging of the subarrays. This overhead has a much more significant impact upon smaller inputs as the work that is split up amongst the processors isn't enought to outweigh this overhead by a lot. On the otherhand, with inputs that are much larger, the overhead becomes a welcome cost as the speedup caused by the distributed it work causes the sorting to occur much more quickly. In addition, in the algorithm, the use of Scatterv ensures that the distribution of the data as well as the communication during merging will be efficient.
+
+
+#### 1. Sample Sort (Mustafa)
+
+**Graphs:** 
+
+
+
+#### 2. Analysis of Results
+
+Main:
+
+Trend: All input types show a similar decreasing trend in the average time per rank as the number of processes increases.
+Observations: The time per rank decreases sharply from 2 to 128 processes, indicating efficient load distribution and parallelization benefits. After about 128 processes, the time per rank flattens, showing diminishing returns with higher process counts.
+Reasoning: The overhead of communication and coordination among more processes outweighs the benefits of further parallelization beyond a certain point, typical in parallel algorithms.
+
+Comm:
+
+Trend: For all inputs, the average time initially decreases as the number of processes increases, reaching a minimum around 128 to 256 processes. Beyond this point, time per rank begins to increase slightly.
+Observations: This trend suggests that communication overhead in the MPI sample sort starts to dominate as the process count grows. As processes increase, the amount of inter-process communication required in sample sorting may introduce latency, especially in larger clusters.
+Insight: The increase in time at higher process counts highlights the balance needed between computation and communication. Efficient sorting relies on optimal process count to minimize communication costs in MPI-based algorithms.
+
+Comp:
+
+Trend: The computation time decreases significantly with an increase in processes across all input types. This is consistent with the main trend, where parallelization reduces computation time effectively up to about 512 processes.
+Observations: This graph shows that the computational workload is well distributed across processes. However, the rate of decrease slows down after a certain point, indicating again the diminishing returns of adding more processes.
+Conclusion: The comp graph confirms that the algorithm scales well in terms of computation but suffers from increasing overhead at higher process counts.
+Comparative Input Analysis
+Random vs. Sorted vs. Perturbed vs. Reverse:
+Across all graphs, the Sorted and Random inputs generally perform slightly better than Reverse and Perturbed. This pattern implies that the MPI sample sort algorithm is somewhat sensitive to the initial ordering of data, with less disorder in the input leading to faster performance.
+For each input type, the differences are minimal at lower process counts but become slightly more apparent as process counts increase, especially in the "comm" graph where communication overhead plays a more significant role.
+
+Overall:
+The MPI sample sort algorithm shows good scalability with increasing processes, but performance gains diminish due to communication overhead, particularly at higher process counts (beyond 256 or 512). Sorted and Random inputs generally lead to slightly faster results, indicating that input order influences performance, although not drastically. The optimal number of processes seems to be around 128 to 256, balancing computation and communication efficiently.
