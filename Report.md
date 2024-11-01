@@ -421,7 +421,7 @@ For larger array sizes, the speedup grows at a slower rate. This tells me that a
 
 #### 1. Merge Sort (Sathvik)
 
-**Example Graph(Temporary):** 
+**Example Graph:** 
 
 - **Main:**
   
