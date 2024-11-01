@@ -1,272 +1,240 @@
 /******************************************************************************
  * FILE: mpi_mm.cpp
  * DESCRIPTION:
- *   MPI implementation of Sample Sort with Caliper instrumentation.
+ *   MPI implementation of Sample Sort Sort with Caliper instrumentation.
  * AUTHOR:
  *   Mustafa Tekin
- * LAST REVISED:
- *   ...
  ******************************************************************************/
 
+#include <iostream>
+#include <vector>
+#include <algorithm>
 #include <mpi.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
 #include <caliper/cali.h>
 #include <caliper/cali-manager.h>
-#include <adiak.hpp>
-#include <string>
-#include <algorithm>
-#include <vector>
+#include <climits>
+
+int* SampleSort(int n, int* elmnts, int* nsorted, MPI_Comm comm) {
+    int i, j, nlocal, npes, myrank;
+    int* sorted_elmnts;
+    int* splitters = nullptr;
+    int* allpicks = nullptr;
+    int* scounts = nullptr;
+    int* sdispls = nullptr;
+    int* rcounts = nullptr;
+    int* rdispls = nullptr;
+
+    // Establishing communicator-related information 
+    MPI_Comm_size(comm, &npes);
+    MPI_Comm_rank(comm, &myrank);
+    nlocal = n / npes;
 
 
-void mpi_sample_sort(int *local_data, int local_n, int rank, int size) {
+
+    // Allocate memory for the arrays that will store the splitters
+    splitters = new int[npes];
+    allpicks = new int[npes * (npes - 1)];
+
+    // Sort local array using std::sort 
     
-    CALI_MARK_BEGIN("local_sort");
-    std::sort(local_data, local_data + local_n);
-    CALI_MARK_END("local_sort");
 
-    
-    CALI_MARK_BEGIN("choose_splitters");
+    CALI_MARK_BEGIN("comp_small");
+    std::sort(elmnts, elmnts + nlocal);
+    CALI_MARK_END("comp_small");
 
 
-    int *splitters = nullptr;
-    int *all_splitters = nullptr;
-    if (rank == 0) {
-        splitters = (int *)malloc((size - 1) * sizeof(int));
-        all_splitters = (int *)malloc(size * (size - 1) * sizeof(int));
-    }
+    // Select local npes-1 equally spaced elements 
+    for (i = 1; i < npes; i++)
+        splitters[i - 1] = elmnts[i * nlocal / npes];
+
+    // Gather the samples in the processors 
+    CALI_MARK_BEGIN("comp_large");
+    MPI_Allgather(splitters, npes - 1, MPI_INT, allpicks, npes - 1, MPI_INT, comm);
+    CALI_MARK_END("comp_large");
 
 
-    int step = local_n / size;
-    std::vector<int> local_splitters;
+    // Sort the samples using std::sort 
 
+    CALI_MARK_BEGIN("comp_small");
+    std::sort(allpicks, allpicks + npes * (npes - 1));
+    CALI_MARK_END("comp_small");    
 
-    for (int i = 1; i < size; ++i) {
-        local_splitters.push_back(local_data[i * step]);
-    }
+    CALI_MARK_BEGIN("comm"); 
+    CALI_MARK_BEGIN("comm_small");
+    // Pick splitters 
+    for (i = 1; i < npes; i++)
+        splitters[i - 1] = allpicks[i * npes];
+    splitters[npes - 1] = INT_MAX;
+    CALI_MARK_END("comm_small");
+    CALI_MARK_END("comm"); 
 
-
-    MPI_Gather(local_splitters.data(), size - 1, MPI_INT, all_splitters, size - 1, MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("choose_splitters");
-
-    
-    if (rank == 0) {
-
-        std::vector<int> all_splitters_vec(all_splitters, all_splitters + size * (size - 1));
-        std::sort(all_splitters_vec.begin(), all_splitters_vec.end());
-
-        for (int i = 1; i < size; ++i) {
-            splitters[i - 1] = all_splitters_vec[i * (size - 1)];
-
+    // comm large the number of elements that belong to each bucket 
+    CALI_MARK_BEGIN("comm"); 
+    CALI_MARK_BEGIN("comm_large");
+    scounts = new int[npes]();
+    for (j = i = 0; i < nlocal; i++) {
+        while (j < npes - 1 && elmnts[i] >= splitters[j]) {
+            j++;
         }
-        free(all_splitters);
-
-
+        scounts[j]++;
     }
-    MPI_Bcast(splitters, size - 1, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_END("comm_large");
+    CALI_MARK_END("comm"); 
 
+
+
+    // Determine the starting location of each bucket's elements in the elmnts array 
     
-    CALI_MARK_BEGIN("partition_data");
+    sdispls = new int[npes]();
+    for (i = 1; i < npes; i++)
+        sdispls[i] = sdispls[i - 1] + scounts[i - 1];
+
+    // Perform an all-to-all to inform the corresponding processes of the number of elements 
+    rcounts = new int[npes];
+    CALI_MARK_BEGIN("comm"); 
+    CALI_MARK_BEGIN("comm_large");
+    MPI_Alltoall(scounts, 1, MPI_INT, rcounts, 1, MPI_INT, comm);
+    CALI_MARK_END("comm_large");
+    CALI_MARK_END("comm"); 
+
+    // Based on rcounts determine where in the local array the data from each processor 
+    // will be stored. This array will store the received elements as well as the final 
+    // sorted sequence
+    rdispls = new int[npes]();
+    for (i = 1; i < npes; i++)
+        rdispls[i] = rdispls[i - 1] + rcounts[i - 1];
+    *nsorted = rdispls[npes - 1] + rcounts[npes - 1];
+    sorted_elmnts = new int[*nsorted];
+
+    // Each process sends and receives the corresponding elements 
+    CALI_MARK_BEGIN("comm"); 
+    MPI_Alltoallv(elmnts, scounts, sdispls, MPI_INT, sorted_elmnts, rcounts, rdispls, MPI_INT, comm);
+    CALI_MARK_END("comm"); 
 
 
-    std::vector<int> send_counts(size, 0);
-    std::vector<int> send_displs(size, 0);
-    std::vector<int> recv_counts(size, 0);
-    std::vector<int> recv_displs(size, 0);
+    // Perform the final local sort
+
+ 
+    CALI_MARK_BEGIN("comp_small"); 
+    std::sort(sorted_elmnts, sorted_elmnts + (*nsorted));
+    CALI_MARK_END("comp_small");
 
 
-    std::vector<std::vector<int>> buckets(size);
+    // Free allocated memory 
+    delete[] splitters;
+    delete[] allpicks;
+    delete[] scounts;
+    delete[] sdispls;
+    delete[] rcounts;
+    delete[] rdispls;
 
-    for (int i = 0; i < local_n; ++i) {
-        int bucket_idx = 0;
-        while (bucket_idx < size - 1 && local_data[i] > splitters[bucket_idx]) {
-            ++bucket_idx;
-        }
-        buckets[bucket_idx].push_back(local_data[i]);
-    }
-
-    for (int i = 0; i < size; ++i) {
-        send_counts[i] = buckets[i].size();
-    }
-
-
-    MPI_Alltoall(send_counts.data(), 1, MPI_INT, recv_counts.data(), 1, MPI_INT, MPI_COMM_WORLD);
-
-    send_displs[0] = 0;
-    recv_displs[0] = 0;
-
-
-    for (int i = 1; i < size; ++i) {
-        send_displs[i] = send_displs[i - 1] + send_counts[i - 1];
-        recv_displs[i] = recv_displs[i - 1] + recv_counts[i - 1];
-    }
-
-    int total_send = send_displs[size - 1] + send_counts[size - 1];
-    int total_recv = recv_displs[size - 1] + recv_counts[size - 1];
-
-
-    std::vector<int> send_buffer(total_send);
-    std::vector<int> recv_buffer(total_recv);
-
-    int idx = 0;
-    for (int i = 0; i < size; ++i) {
-        for (int val : buckets[i]) {
-            send_buffer[idx++] = val;
-        }
-    }
-    MPI_Alltoallv(send_buffer.data(), send_counts.data(), send_displs.data(), MPI_INT,
-                  recv_buffer.data(), recv_counts.data(), recv_displs.data(), MPI_INT, MPI_COMM_WORLD);
-    CALI_MARK_END("partition_data");
-
-    
-    CALI_MARK_BEGIN("merge_data");
-
-
-    std::sort(recv_buffer.begin(), recv_buffer.end());
-    for (int i = 0; i < total_recv; ++i) {
-        local_data[i] = recv_buffer[i];
-    }
-
-
-    CALI_MARK_END("merge_data");
-
-
+    return sorted_elmnts;
 }
 
-int main(int argc, char *argv[]) {
-    int rank, size;
-    int n = 1024; 
-    int *data = NULL;
-    int *local_data = NULL;
-    int local_n;
-    double start_time, end_time;
+int main(int argc, char* argv[]) {
+    CALI_CXX_MARK_FUNCTION;
+    int n;
+    int npes;
+    int myrank;
+    int nlocal;
+    int* elmnts;  /* array that stores the local elements */
+    int* vsorted; /* array that stores the final sorted elements */
+    int nsorted;  /* number of elements in vsorted */
+    double stime, etime;
 
-    
     MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &npes);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-    
     cali::ConfigManager mgr;
-    mgr.add("runtime-report");
     mgr.start();
 
-    
-    CALI_MARK_BEGIN("main");
-
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    
-    if (argc >= 2) {
-        n = atoi(argv[1]);
-    }
-
-    std::string input_type = "random";
-    if (argc >= 3) {
-        input_type = argv[2];
-    }
-
-    
-    if (n % size != 0) {
-        if (rank == 0)
-            printf("Array size must be divisible by number of processes.\n");
-        MPI_Finalize();
-        exit(0);
-    }
-
-    local_n = n / size;
-    local_data = (int *)malloc(local_n * sizeof(int));
-
-    
-    if (rank == 0) {
-        data = (int *)malloc(n * sizeof(int));
-
-        
-        CALI_MARK_BEGIN("data_init_runtime");
-
-        
-        if (input_type == "random") {
-            srand(time(NULL));
-            for (int i = 0; i < n; i++) {
-                data[i] = rand() % n;
-            }
-        } else if (input_type == "sorted") {
-            for (int i = 0; i < n; i++) {
-                data[i] = i;
-            }
-        } else if (input_type == "reverse") {
-            for (int i = 0; i < n; i++) {
-                data[i] = n - i;
-            }
-        } else {
-            srand(time(NULL));
-            for (int i = 0; i < n; i++) {
-                data[i] = rand() % n;
-            }
+    if (argc != 2) {
+        if (myrank == 0) {
+            std::cout << "Usage: mpiexec -n <p> " << argv[0] << " <n>" << std::endl;
         }
-
-        CALI_MARK_END("data_init_runtime");
+        //MPI_Finalize();
+        return 1;
     }
 
+    n = atoi(argv[1]);
+    nlocal = n / npes; /* Compute the number of elements to be stored locally. */
+
+    /* Allocate memory for the various arrays */
+    elmnts = new int[nlocal];
+
+    /* Fill-in the elments array with random elements */
+    //
+
+    CALI_MARK_BEGIN("data_init_runtime");
+    srand(myrank);
+    // Sorted Start
+    int current_value = rand() % (10 * n + 1);  
+elmnts[0] = current_value;
+
+for (int i = 1; i < nlocal; i++) {
+    current_value += rand() % (10 * n + 1);  
+    elmnts[i] = current_value;
+}
+    // Sorted End
+
+    // Random Start
+    //for (int i = 0; i < nlocal; i++) {
+    //    elmnts[i] = rand() % (10 * n + 1);
+    //}
+    // Random End
+    CALI_MARK_END("data_init_runtime");
     
-    CALI_MARK_BEGIN("comm");
-    CALI_MARK_BEGIN("comm_large");
-
-    MPI_Scatter(data, local_n, MPI_INT, local_data, local_n, MPI_INT, 0, MPI_COMM_WORLD);
-
-    CALI_MARK_END("comm_large");
-    CALI_MARK_END("comm");
-
-    
+    CALI_MARK_BEGIN("comp");
     MPI_Barrier(MPI_COMM_WORLD);
 
+    stime = MPI_Wtime();
 
-    start_time = MPI_Wtime();
-
+    // comp start
     
-    mpi_sample_sort(local_data, local_n, rank, size);
+    vsorted = SampleSort(n, elmnts, &nsorted, MPI_COMM_WORLD);
+    CALI_MARK_END("comp");
+    //comp end
+    etime = MPI_Wtime();
 
-    
+
+    CALI_MARK_BEGIN("MPI_Barrier");
     MPI_Barrier(MPI_COMM_WORLD);
-    end_time = MPI_Wtime();
+    CALI_MARK_END("MPI_Barrier");
 
-    
-    CALI_MARK_BEGIN("comm");
-    CALI_MARK_BEGIN("comm_large");
-    if (rank == 0) {
-        MPI_Gather(MPI_IN_PLACE, local_n, MPI_INT, data, local_n, MPI_INT, 0, MPI_COMM_WORLD);
-    } else {
-        MPI_Gather(local_data, local_n, MPI_INT, data, local_n, MPI_INT, 0, MPI_COMM_WORLD);
+    // Gather size of sorted arrays from all processes 
+    int total_sorted_elements = nsorted;
+    int* total_counts = new int[npes];
+    //comm large start
+    CALI_MARK_BEGIN("comm-large");
+    MPI_Gather(&nsorted, 1, MPI_INT, total_counts, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_BEGIN("comm-large");
+    //comm large end
+
+    CALI_MARK_BEGIN("correctness_check");
+    if (myrank == 0) {
+        for (int i = 1; i < npes; i++) {
+            total_sorted_elements += total_counts[i];
+        }
+        std::cout << "Total sorted elements: " << total_sorted_elements << std::endl;
+        std::cout << "Expected sorted elements: " << n << std::endl;
+
+        // Check if the sorted array is valid
+        bool is_sorted = std::is_sorted(vsorted, vsorted + nsorted);
+        std::cout << "Is the sorted array valid? " << (is_sorted ? "Yes" : "No") << std::endl;
+        std::cout << "Sorting time: " << etime - stime << " sec" << std::endl;
     }
-    CALI_MARK_END("comm_large");
-    CALI_MARK_END("comm");
+    CALI_MARK_END("correctness_check");
 
-    
-    free(local_data);
+    delete[] elmnts;
+    delete[] vsorted;
+    delete[] total_counts;
 
-    
-    mgr.flush();
     mgr.stop();
-
-    
-    adiak::init(NULL);
-    adiak::launchdate();    // Launch date of the job
-    adiak::libraries();     // Libraries used
-    adiak::cmdline();       // Command line used to launch the job
-    adiak::clustername();   // Name of the cluster
-    adiak::value("algorithm", "Sample Sort"); // The name of the algorithm
-    adiak::value("programming_model", "MPI"); // Programming model used
-    adiak::value("data_type", "int"); // Data type of input elements
-    adiak::value("size_of_data_type", sizeof(int)); // Size of data type in bytes
-    adiak::value("input_size", n); // Number of elements in input dataset
-    adiak::value("input_type", input_type); // Type of input data
-    adiak::value("num_procs", size); // Number of processors (MPI ranks)
-    adiak::value("scalability", "strong"); // Scalability type ("strong" or "weak")
-    adiak::value("group_num", 21); // Group number
-    adiak::value("implementation_source", "Handwritten"); // Source of implementation
-
-    CALI_MARK_END("main");
+    mgr.flush();
 
     MPI_Finalize();
+
     return 0;
 }
