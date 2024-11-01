@@ -413,6 +413,14 @@ In a parallel merge sort algorithm, the communication overhead exists within the
 #### 1. Sample Sort (Mustafa)
 
 **Graphs:** 
+Main (Strong Scaling):
+
+
+Comm (Strong Scaling):
+
+
+Comp (Strong Scaling):
+
 
 
 
