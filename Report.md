@@ -477,3 +477,159 @@ For each input type, the differences are minimal at lower process counts but bec
 
 Overall:
 The MPI sample sort algorithm shows good scalability with increasing processes, but performance gains diminish due to communication overhead, particularly at higher process counts (beyond 256 or 512). Sorted and Random inputs generally lead to slightly faster results, indicating that input order influences performance, although not drastically. The optimal number of processes seems to be around 128 to 256, balancing computation and communication efficiently.
+
+
+
+#### 1. Radix Sort (Yusa)
+
+**Graphs:** 
+
+Main Random (Strong Scaling):
+![image](https://github.com/user-attachments/assets/145ccd34-a6c5-4e0e-9086-702b419a557c)
+
+
+Main Sorted (Strong Scaling):
+![image](https://github.com/user-attachments/assets/1240d15f-eed9-48d7-bf5d-200a8c6dbde7)
+
+
+Main Reverse (Strong Scaling):
+![image](https://github.com/user-attachments/assets/ba9bcf73-fcf2-4f74-9828-cc06615a7d39)
+
+
+Comp input size 6553 (Strong Scaling):
+![image](https://github.com/user-attachments/assets/3fe928ae-f54e-4827-86ab-c35cb8aee686)
+
+
+Comp input size 262144 (Strong Scaling):
+![image](https://github.com/user-attachments/assets/c35e79d1-efb1-46e9-992a-a1d24a222b31)
+
+
+Comp input size 1048576 (Strong Scaling):
+![image](https://github.com/user-attachments/assets/1046303c-58ce-4dd2-a118-5f46815f03d4)
+
+
+Comp input size 4194304 (Strong Scaling):
+![image](https://github.com/user-attachments/assets/50b204f8-37e7-4715-a95b-05560e779be1)
+
+
+Comp input size 16777216 (Strong Scaling):
+![image](https://github.com/user-attachments/assets/115f283b-1aa5-4e20-a68e-dad1b96533ef)
+
+
+Comp input size 67108864 (Strong Scaling):
+![image](https://github.com/user-attachments/assets/412d848e-7d6a-4ad3-b5f3-82dd89613e9c)
+
+
+Comp input size 268435456 (Strong Scaling):
+![image](https://github.com/user-attachments/assets/fa78b5a1-1971-45f2-bd16-36f8b79fd239)
+
+
+Speedup Random (Main)
+![image](https://github.com/user-attachments/assets/a5494b33-9f82-4f46-aa63-6ba122d20b26)
+
+Speedup Sorted (Main)
+![image](https://github.com/user-attachments/assets/49b5451a-f2f0-48e3-9df8-ab17eb074a17)
+
+Speedup Reverse (Main)
+![image](https://github.com/user-attachments/assets/a2f5ef09-2b98-45e7-9f95-aba26613854a)
+
+Speedup Perturbed 1% (Main)
+![image](https://github.com/user-attachments/assets/282b5f61-1fb4-4c52-9d79-82535c5386eb)
+
+Speedup Random (Communication)
+![image](https://github.com/user-attachments/assets/05511d2e-dfc5-48d6-b341-5524bb7f307c)
+
+Speedup Sorted (Communication)
+![image](https://github.com/user-attachments/assets/53134068-e954-4047-b403-9e01e6f31f20)
+
+Speedup Reverse (Communication)
+![image](https://github.com/user-attachments/assets/57b6b005-9ffc-45a2-8853-32ed2ea750a9)
+
+Speedup Perturbed 1% (Communication)
+![image](https://github.com/user-attachments/assets/b721df64-bd78-4b3b-b69c-de6c3178ee94)
+
+Speedup Random (Comp)
+![image](https://github.com/user-attachments/assets/83c46198-a525-4927-ada2-133a8ca11310)
+
+Speedup Sorted (Comp)
+![image](https://github.com/user-attachments/assets/99818d69-d23e-48db-ba10-ce7867bd3c9e)
+
+Speedup Reverse (Comp)
+![image](https://github.com/user-attachments/assets/b03b8e49-6ce5-47e1-9cd2-d0ac144108d4)
+
+Speedup Perturbed 1% (Comp)
+![image](https://github.com/user-attachments/assets/e1762af7-dac1-4e45-8d94-e603b286bffa)
+
+
+
+
+Main Random (Weak Scaling)
+![image](https://github.com/user-attachments/assets/04e0df0a-372b-4143-8b2a-2b7373151a3e)
+
+Main Sorted (Weak Scaling)
+![image](https://github.com/user-attachments/assets/078fe029-de03-463a-af29-a3430fca2dcf)
+
+Main Reverse (Weak Scaling)
+![image](https://github.com/user-attachments/assets/197e8326-5268-427a-a75f-9901f580c54c)
+
+Main Perturbed 1% (Weak Scaling)
+![image](https://github.com/user-attachments/assets/e6b831aa-02aa-4f02-ad35-d7b2a403da37)
+
+
+Communication Random (Weak Scaling)
+![image](https://github.com/user-attachments/assets/59a83bb9-98c7-40bb-b728-278a6a8f4b03)
+
+Communication Sorted (Weak Scaling)
+![image](https://github.com/user-attachments/assets/5cbba818-aff8-448d-9555-d6d4e87009fc)
+
+Communication Reverse (Weak Scaling)
+![image](https://github.com/user-attachments/assets/c280b956-c884-4342-8b9e-e75a7dfcceea)
+
+Communication Perturbed 1% (Weak Scaling)
+![image](https://github.com/user-attachments/assets/ef30b879-0226-4986-828b-c93e6e353d9a)
+
+
+
+
+#### 2. Analysis of Results Radix Sort
+
+
+1. Strong Scaling Analysis:
+
+Large input sizes scale well: The parallel Radix Sort implementation demonstrates effective strong scaling for larger input sizes, such as 2^24 2^24 and 2^28 2^28
+  elements. As the number of processors increases, the average time per rank decreases significantly for these large datasets. This indicates that the workload is being efficiently divided among processors, allowing for concurrent processing of different portions of the data. The algorithm benefits from the parallelization of digit-wise sorting steps, which are computationally intensive for large arrays.
+
+Diminishing returns at higher processor counts: While the time per rank decreases with more processors, the rate of improvement slows down beyond a certain point, typically around 256 to 512 processors. This plateau suggests that communication overhead and synchronization costs start to offset the benefits of adding more processors. The fixed overheads in the algorithm, such as broadcasting the maximum number of digits and gathering sorted subarrays, become more prominent as the per-processor workload decreases.
+
+Small input sizes suffer from overhead: For smaller input sizes like 
+2^16, 2^16 and 2^18 2^18, the strong scaling plots show minimal improvement or even slight increases in time per rank with more processors. This is due to the overhead of initializing MPI processes and the relative cost of communication compared to computation. With less data per processor, the time spent on communication and synchronization constitutes a larger fraction of the total execution time, negating the benefits of parallelism.
+
+Input type impact is minimal: Unlike comparison-based sorting algorithms, Radix Sort's performance is less sensitive to the initial ordering of data. The strong scaling plots for different input types—Random, Sorted, Reverse Sorted, and 1% Perturbed—are closely aligned. This consistency occurs because Radix Sort processes each digit position uniformly, regardless of the data distribution. Therefore, the algorithm exhibits similar performance characteristics across different input types in strong scaling scenarios.
+
+2. Weak Scaling Analysis:
+
+Stable performance with increasing problem size: In the weak scaling analysis, where both the problem size and the number of processors increase proportionally, the average time per rank remains relatively constant for larger datasets. This indicates that the algorithm scales efficiently, maintaining consistent performance as the workload per processor stays the same. The Radix Sort algorithm effectively handles larger datasets without significant degradation in per-processor performance.
+
+Slight increase in time for higher processor counts: Although the average time per rank is relatively stable, there is a slight upward trend as the number of processors increases beyond 256. This increase is attributed to the cumulative communication overhead associated with more processors. Each additional processor introduces more points of synchronization and communication, slightly increasing the total execution time.
+
+Uniform performance across input types: Similar to the strong scaling results, the weak scaling plots show minimal variation across different input types. The algorithm's digit-wise processing ensures that the input data's initial order does not significantly impact the computation or communication patterns. As a result, the average time per rank remains consistent across Random, Sorted, Reverse Sorted, and 1% Perturbed inputs in weak scaling experiments.
+
+3. Communication Overhead:
+
+Communication costs become significant at high processor counts: Communication overhead is a critical factor affecting the parallel Radix Sort's performance, especially as the number of processors increases. The algorithm involves multiple collective operations, such as broadcasts and gathers, during each digit's sorting phase. These operations require synchronization and data exchange among all processors, which can introduce latency.
+
+Impact on small input sizes: For smaller arrays, the communication overhead can dominate the total execution time. Since each processor handles a smaller portion of the data, the relative cost of communication (e.g., broadcasting the maximum number of digits or gathering sorted subarrays) increases. This overhead leads to less efficient scaling and can result in longer execution times despite increasing the number of processors.
+
+Efficient communication patterns for large inputs: In contrast, for larger input sizes, the communication overhead is amortized over a more substantial computational workload per processor. The time spent on communication constitutes a smaller percentage of the total execution time, allowing the algorithm to scale more effectively. The use of optimized MPI collective operations helps mitigate communication costs, but their impact becomes more pronounced with higher processor counts.
+
+4. Input Type Effects:
+
+Minimal influence of input ordering: The Radix Sort algorithm's performance is largely independent of the initial data ordering. Since the algorithm processes each digit position systematically, the distribution or order of the input data does not significantly affect the number of operations required. This behavior is reflected in the performance graphs, where all input types exhibit similar execution times across various processor counts.
+
+Consistency across different datasets: The slight variations observed among different input types are negligible compared to those in comparison-based sorting algorithms. This consistency makes Radix Sort a robust choice for parallel sorting tasks where the input data characteristics are unknown or highly variable.
+
+5. Overall Observations and Speedup Analysis:
+
+Effective parallelization for large-scale sorting: The parallel Radix Sort implementation demonstrates good scalability for large input sizes, making it suitable for high-performance computing environments where massive datasets are common. The algorithm efficiently leverages multiple processors to reduce computation time, particularly when the per-processor workload is substantial enough to outweigh communication overheads.
+
+Diminishing returns due to communication overhead: As the number of processors increases beyond a certain threshold, the benefits of adding more processors diminish. The communication and synchronization costs begin to dominate, leading to a plateau in performance improvements. Identifying the optimal number of processors is crucial to maximize efficiency and minimize unnecessary overhead.
