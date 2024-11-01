@@ -423,7 +423,69 @@ For larger array sizes, the speedup grows at a slower rate. This tells me that a
 
 **Example Graph(Temporary):** 
 
-![image](https://github.com/user-attachments/assets/e200960f-4f64-416c-961b-296222e28144)
+- **Main:**
+  
+  - Strong Scaling Plots for Each Input Size:    
+    ![Alt text](image.png)
+    ![Alt text](image-1.png)
+    ![Alt text](image-2.png)
+    ![Alt text](image-3.png)
+    ![Alt text](image-4.png)
+    ![Alt text](image-5.png)
+    ![Alt text](image-6.png)
+
+  - Strong Scaling Speedup Plots
+    ![Alt text](image-7.png)
+    ![Alt text](image-8.png)
+    ![Alt text](image-9.png)
+    ![Alt text](image-10.png)
+
+  - Weak Scaling Plots (Combined on One Graph)
+    ![Alt text](image-11.png)
+    
+
+- **Comm:**
+  
+  - Strong Scaling Plots for Each Input Size
+    ![Alt text](image-12.png)
+    ![Alt text](image-13.png)
+    ![Alt text](image-14.png)
+    ![Alt text](image-15.png)
+    ![Alt text](image-16.png)
+    ![Alt text](image-17.png)
+    ![Alt text](image-18.png)
+    
+  - Strong Scaling Speedup Plots
+    ![Alt text](image-19.png)
+    ![Alt text](image-20.png)
+    ![Alt text](image-21.png)
+    ![Alt text](image-22.png)
+      
+  - Weak Scaling Plots (Combined on One Graph)
+    ![Alt text](image-23.png)
+    
+
+
+- **Comm_Large:**
+  
+  - Strong Scaling Plots for Each Input Size
+    ![Alt text](image-24.png)
+    ![Alt text](image-25.png)
+    ![Alt text](image-26.png)
+    ![Alt text](image-27.png)
+    ![Alt text](image-28.png)
+    ![Alt text](image-29.png)
+    ![Alt text](image-30.png)
+    
+  - Strong Scaling Speedup Plots
+    ![Alt text](image-31.png)
+    ![Alt text](image-32.png)
+    ![Alt text](image-33.png)
+    ![Alt text](image-34.png)
+
+  - Weak Scaling Plots (Combined on One Graph)
+    ![Alt text](image-35.png)
+
 
 #### 2. Analysis of Results
 
@@ -435,6 +497,8 @@ For this merge sort algorithm, whenever both the problem size and the input size
 
 3. Communication Overhead
 In a parallel merge sort algorithm, the communication overhead exists within the distribution of the data amongst all of the processors as well as the merging of the subarrays. This overhead has a much more significant impact upon smaller inputs as the work that is split up amongst the processors isn't enought to outweigh this overhead by a lot. On the otherhand, with inputs that are much larger, the overhead becomes a welcome cost as the speedup caused by the distributed it work causes the sorting to occur much more quickly. In addition, in the algorithm, the use of Scatterv ensures that the distribution of the data as well as the communication during merging will be efficient.
+
+One key item that I noticed is that the runs that I had done with the 128 processors seemed to have taken signifiantly more time than any of the other runs and I think this could be due to a variety of outside factors such as the workload of grace or just outliers in the data, but it doesn't seem to be representative of the algorithm.
 
 
 #### 1. Sample Sort (Mustafa)
